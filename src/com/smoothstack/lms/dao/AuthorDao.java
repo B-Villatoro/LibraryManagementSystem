@@ -6,17 +6,14 @@ import java.util.*;
 import com.smoothstack.lms.model.Author;
 import com.smoothstack.lms.model.Book;
 
-
 public class AuthorDao {
-
-    Scanner scan = new Scanner(System.in);
 
     public static void add(Author authorO) {
         try {
             FileWriter fr = new FileWriter("./resources/booksAndAuthors.csv", true);
             BufferedWriter writer = new BufferedWriter(fr);
             writer.newLine();
-            writer.append(authorO.getName() + ";");
+            writer.append(authorO.getName() + ";"+authorO.getId());
             authorO.getBooks().forEach(e -> {
                 try {
                     writer.append(e.getTitle() + ";");
@@ -31,7 +28,6 @@ public class AuthorDao {
             e.printStackTrace();
         }
     }
-
 
     public static void show() {
         File fileName = new File("./resources/booksAndAuthors.csv");
@@ -106,7 +102,7 @@ public class AuthorDao {
         }
     }
 
-    public void update(String key, Map<String, List<Book>> map) {
+    public static void update(String key, Map<String, List<Book>> map) {
         if (map.containsKey(key)) {
 
             List<Book> newBooks = map.get(key);
@@ -115,6 +111,7 @@ public class AuthorDao {
             map.get(key).forEach(e -> {
                 System.out.println(e.getTitle() + " " + e.getIsbn());
             });
+            Scanner scan = new Scanner(System.in);
             String userChoice = scan.nextLine();
             int listIndex = 99999;
             for (int i = 0; i < newBooks.size(); i++) {
