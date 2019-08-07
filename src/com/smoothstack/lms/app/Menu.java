@@ -229,18 +229,12 @@ public class Menu {
         switch (opt) {
             case "1":
             case "author":
-                Map<String, Author> authorMap = AuthorDao.createMap();
-                System.out.println("Write the author you would like to delete?");
-                String deleteKey = scan.nextLine();
-                AuthorDao.delete(deleteKey, authorMap);
+                handleDeleteAuthor();
                 backToMenu();
                 break;
             case "2":
             case "book":
-                Map<String, Book> bookMap = BookDao.createMap();
-                System.out.println("Write the publisher you would like to delete?");
-                String deleteKey0 = scan.nextLine();
-                BookDao.delete(deleteKey0, bookMap);
+                handleDeleteBook();
                 backToMenu();
                 break;
 
@@ -272,7 +266,6 @@ public class Menu {
 
         if (authorMap.containsKey(authorId)) {
             System.out.println("Author id already exists");
-            backToMenu();
         } else {
             System.out.println("Please enter the author name you would like to add");
             name = scan.nextLine();
@@ -299,7 +292,6 @@ public class Menu {
         //if isbn already exists, book exists
         if (bookMap.containsKey(isbn)) {
             System.out.println("ISBN already exists, returning to main menu");
-            mainMenu();
         } else {
             //prompt for pid and check if exists
             Map<String, Publisher> publisherMap = PublisherDao.createMap();
@@ -350,7 +342,6 @@ public class Menu {
         publisherId = "pid-" + publisherId;
         if (publisherMap.containsKey(publisherId)) {
             System.out.println("Publisher id already exists");
-            backToMenu();
         } else {
             System.out.println("Please enter the publisher name you would like to add");
             publisherName = scan.nextLine();
@@ -395,9 +386,9 @@ public class Menu {
                     Map<String,Book> bookMap = BookDao.createMap();
 
                     String finalChangeAid = changeAid;
-                    bookMap.entrySet().forEach(e-> {
-                        if(e.getValue().getAuthorId().equalsIgnoreCase(authorMap.get(authorKey).getId())){
-                            e.getValue().setAuthorId("aid-"+finalChangeAid);
+                    bookMap.forEach((key,book)-> {
+                        if(book.getAuthorId().equalsIgnoreCase(authorMap.get(authorKey).getId())){
+                            book.setAuthorId("aid-"+finalChangeAid);
                         }
                     });
                     a.setId("aid-" + changeAid);
@@ -510,6 +501,13 @@ public class Menu {
                         System.out.println("Id already exists, please try again.");
                         changeId = scan.nextLine();
                     }
+                    Map<String,Book>bookMap = BookDao.createMap();
+                    String finalChangePid = changeId;
+                    bookMap.entrySet().forEach(e-> {
+                        if(e.getValue().getAuthorId().equalsIgnoreCase(publisherMap.get(publisherKey).getId())){
+                            e.getValue().setAuthorId("pid-"+finalChangePid);
+                        }
+                    });
                     p.setId("pid-" + changeId);
                     publisherMap.remove(publisherKey);
                     publisherMap.put(changeId, p);
@@ -520,5 +518,65 @@ public class Menu {
             System.out.println("Publisher does not exist");
         }
 
+    }
+    private static void handleDeleteAuthor(){
+        Map<String, Author> authorMap = AuthorDao.createMap();
+        Map<String,Book> bookMap = BookDao.createMap();
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Enter the author id you would like to delete");
+        String deleteKey = scan.nextLine();
+        String finalDeleteKey = "aid-"+deleteKey;
+        bookMap.forEach((key,book)-> {
+                    if (book.getAuthorId().equalsIgnoreCase(authorMap.get(finalDeleteKey).getId())) {
+                        BookDao.delete(key, bookMap);
+                    }
+                });
+        AuthorDao.delete(deleteKey, authorMap);
+    }
+    private static void handleDeleteBook(){
+        Map<String, Author> authorMap = AuthorDao.createMap();
+        Map<String,Book> bookMap = BookDao.createMap();
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Enter the isbn you would like to delete");
+        String deleteKey = scan.nextLine();
+        String finalDeleteKey = "isbn-"+deleteKey;
+
+        authorMap.forEach((key,bookList)-> {
+            if (bookList.getBooks().contains(bookMap.get(finalDeleteKey))) {
+                bookList.getBooks().remove(bookMap.get(finalDeleteKey));
+                AuthorDao.update(authorMap);
+                if(authorMap.get(key).getBooks().isEmpty()){
+                    AuthorDao.delete(key,authorMap);
+                }
+            }
+        });
+        BookDao.delete(deleteKey, bookMap);
+    }
+    private static void handleDeletePublisher(){
+        Map<String, Publisher> publisherMap = PublisherDao.createMap();
+        Map<String,Book> bookMap = BookDao.createMap();
+        Map<String,Author> authorMap = AuthorDao.createMap();
+        Scanner scan = new Scanner(System.in);
+
+        System.out.println("Enter the publisher id you would like to delete");
+        String deleteKey = scan.nextLine();
+        String finalDeleteKey = "pid-"+deleteKey;
+
+        authorMap.forEach((key,bookList)-> {
+            if (bookList.getBooks().contains(bookMap.get(finalDeleteKey))) {
+                bookList.getBooks().remove(bookMap.get(finalDeleteKey));
+                AuthorDao.update(authorMap);
+                if(authorMap.get(key).getBooks().isEmpty()){
+                    AuthorDao.delete(key,authorMap);
+                }
+            }
+        });
+
+        bookMap.forEach((key,book)-> {
+            if (book.getPublisherId().equalsIgnoreCase(publisherMap.get(finalDeleteKey).getId())) {
+                BookDao.delete(key, bookMap);
+            }
+        });
+        PublisherDao.delete(deleteKey, publisherMap);
     }
 }

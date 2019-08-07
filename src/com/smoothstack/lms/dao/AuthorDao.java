@@ -81,7 +81,6 @@ public class AuthorDao {
     }
 
     public static void delete(String key, Map<String, Author> map) {
-
         if (map.containsKey(key)) {
             try {
                 FileWriter fr = new FileWriter("./resources/authors.csv");
