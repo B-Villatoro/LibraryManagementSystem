@@ -1,8 +1,6 @@
 package com.smoothstack.lms.dao;
 
 import com.smoothstack.lms.model.Book;
-import com.smoothstack.lms.model.Publisher;
-
 
 import java.io.*;
 import java.util.*;

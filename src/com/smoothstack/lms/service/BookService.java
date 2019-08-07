@@ -98,8 +98,8 @@ public class BookService {
         bookKey = "isbn-" + bookKey;
 
         if (bookMap.containsKey(bookKey)) {
+            //create a book based off books csv
             Book b = bookMap.get(bookKey);
-
             System.out.println("Book found! What would you like to change?\n" +
                     "(1)Book title\n" +
                     "(2)Book ISBN\n" +
@@ -113,21 +113,20 @@ public class BookService {
                     String changeTitle = scan.nextLine();
 
                     authorMap.get(b.getAuthorId()).getBooks().remove(b);
-
                     b.setTitle(changeTitle);
 
                     authorMap.get(b.getAuthorId()).getBooks().add(b);
-
                     bookMap.put(bookKey, b);
                     BookDao.update(bookMap);
                     AuthorDao.update(authorMap);
-
                     break;
 
                 case "2":
                     System.out.println("What would you like to change ISBN to?");
                     String changeIsbn = scan.nextLine();
                     changeIsbn = "isbn-" + changeIsbn;
+
+                    //validate new key
                     while (bookMap.containsKey(changeIsbn)) {
                         System.out.println("ISBN already exists, please try again");
                         changeIsbn = scan.nextLine();
@@ -197,7 +196,5 @@ public class BookService {
         } else {
             System.out.println("Book does not exist");
         }
-
-
     }
 }

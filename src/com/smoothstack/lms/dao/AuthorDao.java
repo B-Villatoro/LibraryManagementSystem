@@ -45,7 +45,7 @@ public class AuthorDao {
 
     public static Map<String, Author> createMap() {
 
-        Map<String, Author> authorBookMap = new HashMap<String, Author>();
+        Map<String, Author> authorBookMap = new HashMap<>();
         //initiated buffer reader
         try {
             FileInputStream fin = new FileInputStream("./resources/authors.csv");
@@ -106,9 +106,8 @@ public class AuthorDao {
 
     public static void update(Map<String, Author> map) {
         try {
-            FileWriter fr = new FileWriter("./resources/authors.csv", true);
+            FileWriter fr = new FileWriter("./resources/authors.csv");
             BufferedWriter writer = new BufferedWriter(fr);
-            writer.newLine();
             map.forEach((key,author)->{
                 try {
                     writer.append(author.getName() + ";");
@@ -123,11 +122,12 @@ public class AuthorDao {
                             ex2.printStackTrace();
                         }
                     });
+                    writer.newLine();
                 } catch (IOException exc) {
                     exc.printStackTrace();
                 }
             });
-            writer.newLine();
+            writer.close();
         } catch (IOException exc1) {
             exc1.printStackTrace();
         }

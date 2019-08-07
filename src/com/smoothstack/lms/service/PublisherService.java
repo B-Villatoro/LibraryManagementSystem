@@ -7,6 +7,8 @@ import com.smoothstack.lms.model.Author;
 import com.smoothstack.lms.model.Book;
 import com.smoothstack.lms.model.Publisher;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -32,9 +34,11 @@ public class PublisherService {
             address = scan.nextLine();
 
             PublisherDao.add(new Publisher(publisherName, address, publisherId));
+            System.out.println(publisherName + " is added!");
         }
     }
-    public static void addPublisher(String publisherId){
+
+    public static void addPublisher(String publisherId) {
         Scanner scan = new Scanner(System.in);
         System.out.println("Please enter the publisher name you would like to add");
         String publisherName = scan.nextLine();
@@ -42,6 +46,7 @@ public class PublisherService {
         System.out.println("Please enter the publisher address");
         String address = scan.nextLine();
         PublisherDao.add(new Publisher(publisherName, address, publisherId));
+        System.out.println(publisherName + " is added!");
     }
 
     public static void updatePublisher() {
@@ -64,43 +69,70 @@ public class PublisherService {
 
             switch (userChoice) {
                 case "1":
-                    System.out.println("What would you like to change it to?");
+                    System.out.println("What would you like to change the name to?");
                     String changeName = scan.nextLine();
                     p.setName(changeName);
                     publisherMap.put(publisherKey, p);
                     PublisherDao.update(publisherMap);
+                    System.out.println("The publisher name has been changed!");
                     break;
 
                 case "2":
-                    System.out.println("What would you like to change it to?");
+                    System.out.println("What would you like to change the address to?");
                     String changeAddress = scan.nextLine();
                     p.setAddress(changeAddress);
                     publisherMap.put(publisherKey, p);
                     PublisherDao.update(publisherMap);
+                    System.out.println("The publisher address has been changed!");
                     break;
 
                 case "3":
-                    System.out.println("What would you like to change it to?");
+                    Map<String, Book> bookMap = BookDao.createMap();
+                    Map<String, Author> authorMap = AuthorDao.createMap();
+
+
+                    System.out.println("What would you like to change the publisher id to?");
                     String changeId = scan.nextLine();
-                    changeId = "pid" + changeId;
+                    changeId = "pid-" + changeId;
+
                     while (publisherMap.containsKey(changeId)) {
                         System.out.println("Id already exists, please try again.");
                         changeId = scan.nextLine();
-                        changeId = "pid" + changeId;
+                        changeId = "pid-" + changeId;
                     }
-                    Map<String, Book> bookMap = BookDao.createMap();
-                    String finalChangePid = changeId;
                     String finalPublisherKey = publisherKey;
+                    String finalChangePid = changeId;
 
-                    bookMap.forEach((key,value) -> {
+
+                    bookMap.forEach((key, value) -> {
                         if (bookMap.get(key).getPublisherId().equalsIgnoreCase(publisherMap.get(finalPublisherKey).getId())) {
+                            //change the pid with every key that had the old one
                             bookMap.get(key).setPublisherId(finalChangePid);
                         }
                     });
+
+                    //first get the author id of current book that was changed, then for each of those books
+                    //that contains old key change it then update author map
+                    authorMap.forEach((key,author)->{
+
+                        authorMap.get(key).getBooks().forEach(book->{
+                            if(book.getPublisherId().equalsIgnoreCase(publisherMap.get(finalPublisherKey).getId())){
+                                System.out.println("og:"+authorMap.get(key).getBooks().get(authorMap.get(key).getBooks().indexOf(book)).getPublisherId());
+                                authorMap.get(key).getBooks().get(authorMap.get(key).getBooks().indexOf(book))
+                                        .setPublisherId(finalChangePid);
+                                System.out.println("change:"+authorMap.get(key).getBooks().get(authorMap.get(key).getBooks().indexOf(book)).getPublisherId());
+                            }
+                        });
+                    });
+
                     p.setId(changeId);
                     publisherMap.remove(publisherKey);
                     publisherMap.put(changeId, p);
+
                     PublisherDao.update(publisherMap);
+                    BookDao.update(bookMap);
+                    AuthorDao.update(authorMap);
+                    System.out.println("Publisher id has been changed!");
                     break;
             }
         } else {
