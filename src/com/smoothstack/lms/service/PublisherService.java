@@ -114,13 +114,10 @@ public class PublisherService {
                     //first get the author id of current book that was changed, then for each of those books
                     //that contains old key change it then update author map
                     authorMap.forEach((key,author)->{
-
                         authorMap.get(key).getBooks().forEach(book->{
                             if(book.getPublisherId().equalsIgnoreCase(publisherMap.get(finalPublisherKey).getId())){
-                                System.out.println("og:"+authorMap.get(key).getBooks().get(authorMap.get(key).getBooks().indexOf(book)).getPublisherId());
                                 authorMap.get(key).getBooks().get(authorMap.get(key).getBooks().indexOf(book))
                                         .setPublisherId(finalChangePid);
-                                System.out.println("change:"+authorMap.get(key).getBooks().get(authorMap.get(key).getBooks().indexOf(book)).getPublisherId());
                             }
                         });
                     });
