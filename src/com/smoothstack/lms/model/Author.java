@@ -9,6 +9,8 @@ public class Author {
     private List<Book> books;
     private String id;
 
+    public Author(){}
+
     public Author(String name, List<Book> books, String id) {
         this.name = name;
         this.books = books;

@@ -10,7 +10,7 @@ public class AuthorDao {
 
     public static void add(Author authorO) {
         try {
-            FileWriter fr = new FileWriter("./resources/booksAndAuthors.csv", true);
+            FileWriter fr = new FileWriter("./resources/authors.csv", true);
             BufferedWriter writer = new BufferedWriter(fr);
             writer.newLine();
             writer.append(authorO.getName() + ";"+authorO.getId());
@@ -30,7 +30,7 @@ public class AuthorDao {
     }
 
     public static void show() {
-        File fileName = new File("./resources/booksAndAuthors.csv");
+        File fileName = new File("./resources/authors.csv");
         try {
             FileReader fr = new FileReader(fileName);
             BufferedReader br = new BufferedReader(fr);
@@ -41,51 +41,55 @@ public class AuthorDao {
         }
     }
 
-    public static Map<String, List<Book>> createMap() {
+    public static Map<String, Author> createMap() {
 
-        Map<String, List<Book>> authorBookMap = new HashMap<String, List<Book>>();
+        Map<String,Author> authorBookMap = new HashMap<String, Author>();
         //initiated buffer reader
         try {
-            FileInputStream fin = new FileInputStream("./resources/booksAndAuthors.csv");
+            FileInputStream fin = new FileInputStream("./resources/authors.csv");
             BufferedReader buffReader = new BufferedReader(new InputStreamReader(fin));
             String authorLine;
 
             while ((authorLine = buffReader.readLine()) != null) {
                 String[] splitArray = authorLine.split(";");
+                //creating the author object to pass into the map
+                Author author = new Author();
+                author.setName(splitArray[0]);
+                author.setId(splitArray[3]);
 
                 Book b = new Book();
                 b.setTitle(splitArray[1]);
                 b.setIsbn(splitArray[2]);
 
-                if (authorBookMap.containsKey(splitArray[0])) {
-                    authorBookMap.get(splitArray[0]).add(b);
+                if (authorBookMap.containsKey(splitArray[3])) {
+                    //if the author id is already made just add the book to the book list
+                    authorBookMap.get(splitArray[0]).getBooks().add(b);
                 } else {
+                    //else make a new value with a new key
                     List<Book> books = new ArrayList<>();
                     books.add(b);
-                    authorBookMap.put(splitArray[0], books);
+                    author.setBooks(books);
+                    authorBookMap.put(splitArray[0], author);
                 }
-
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
         //initiate map
-
         return authorBookMap;
     }
 
-    public static void delete(String key, Map<String, List<Book>> map) {
+    public static void delete(String key, Map<String, Author> map) {
 
         if (map.containsKey(key)) {
             try {
-                FileWriter fr = new FileWriter("./resources/booksAndAuthors.csv");
+                FileWriter fr = new FileWriter("./resources/authors.csv");
                 BufferedWriter writer = new BufferedWriter(fr);
                 map.remove(key);
                 map.forEach((mapKey, bookList) -> {
-                    map.get(mapKey).forEach(e -> {
+                    map.get(mapKey).getBooks().forEach(e -> {
                         try {
-                            String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";";
+                            String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";"+e.getAuthorId()+";";
                             writer.append(stringBuild);
                             writer.newLine();
                         } catch (IOException exc0) {
@@ -102,13 +106,13 @@ public class AuthorDao {
         }
     }
 
-    public static void update(String key, Map<String, List<Book>> map) {
+    public static void update(String key, Map<String,Author> map) {
         if (map.containsKey(key)) {
 
-            List<Book> newBooks = map.get(key);
+            List<Book> newBooks = map.get(key).getBooks();
 
             System.out.println("What would you like to change?");
-            map.get(key).forEach(e -> {
+            map.get(key).getBooks().forEach(e -> {
                 System.out.println(e.getTitle() + " " + e.getIsbn());
             });
             Scanner scan = new Scanner(System.in);
@@ -121,7 +125,7 @@ public class AuthorDao {
                     System.out.println("What Would you like to change it to?");
                     String changeTo = scan.nextLine();
                     newBooks.get(listIndex).setTitle(changeTo);
-                    map.get(key).set(listIndex, newBooks.get(listIndex));
+                    map.get(key).getBooks().set(listIndex, newBooks.get(listIndex));
                     break;
                 }
             }
@@ -130,27 +134,31 @@ public class AuthorDao {
                 update(key,map);
             }
             else{
-                try {
-                    FileWriter fr = new FileWriter("./resources/booksAndAuthors.csv");
-                    BufferedWriter writer = new BufferedWriter(fr);
-                    map.forEach((mapKey, bookList) -> {
-                        map.get(mapKey).forEach(e -> {
-                            try {
-                                String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";";
-                                writer.append(stringBuild);
-                                writer.newLine();
-                            } catch (IOException exc0) {
-                                exc0.printStackTrace();
-                            }
-                        });
-                    });
-                    writer.close();
-                } catch (IOException exc) {
-                    exc.printStackTrace();
-                }
+                doUpdate(map);
             }
         } else {
             System.out.println("Author does not exist");
+        }
+    }
+
+    private static void doUpdate(Map<String,Author>map){
+        try {
+            FileWriter fr = new FileWriter("./resources/authors.csv");
+            BufferedWriter writer = new BufferedWriter(fr);
+            map.forEach((mapKey, bookList) -> {
+                map.get(mapKey).getBooks().forEach(e -> {
+                    try {
+                        String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";"+e.getAuthorId()+";";
+                        writer.append(stringBuild);
+                        writer.newLine();
+                    } catch (IOException exc0) {
+                        exc0.printStackTrace();
+                    }
+                });
+            });
+            writer.close();
+        } catch (IOException exc) {
+            exc.printStackTrace();
         }
     }
 }

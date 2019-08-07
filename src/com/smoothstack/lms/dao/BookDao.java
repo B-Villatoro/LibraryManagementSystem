@@ -73,8 +73,11 @@ public class BookDao {
                 map.remove(key);
                 map.forEach((mapKey, value) -> {
                     try {
-                        writer.append(mapKey + ";" + value.getTitle() + ";" +
-                                value.getIsbn() + ";" + value.getAuthorId() + ";" + value.getPublisherId());
+                        writer.append(mapKey + ";");
+                        writer.append(value.getTitle() + ";");
+                        writer.append(value.getIsbn() + ";");
+                        writer.append(value.getAuthorId() + ";");
+                        writer.append(value.getPublisherId() + ";");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -89,63 +92,7 @@ public class BookDao {
     }
 
 
-    public static void update(String key, Map<String, Book> map) {
-        Scanner scan = new Scanner(System.in);
-        if (map.containsKey(key)) {
-            Book b = map.get(key);
-            System.out.println("What would you like to change?\n" +
-                    "(1)Title\n" +
-                    "(2)Isbn\n" +
-                    "(3)Author id\n" +
-                    "(4)Publisher id");
-            String userChoice = scan.nextLine();
-            switch (userChoice) {
-                case "1":
-                    System.out.println("What would you like to change it to?");
-                    String changeTitle = scan.nextLine();
-                    b.setTitle(changeTitle);
-                    map.put(key, b);
-                    doUpdate(map);
-                    break;
-                case "2":
-                    System.out.println("What would you like to change it to?");
-                    String changeIsbn = scan.nextLine();
-                    while (map.containsKey(changeIsbn)) {
-                        System.out.println("ISBN already exists");
-                        changeIsbn = scan.nextLine();
-                    }
-                    b.setIsbn("isbn-" + changeIsbn);
-                    map.remove(key);
-                    map.put(changeIsbn, b);
-                    doUpdate(map);
-                    break;
-
-                case "3":
-                    System.out.println("What would you like to change it to?");
-                    String changeAid = scan.nextLine();
-                    b.setAuthorId("aid-" + changeAid);
-                    map.put(changeAid, b);
-                    doUpdate(map);
-                    break;
-
-                case "4":
-                    System.out.println("What would you like to change it to?");
-                    String changePid = scan.nextLine();
-                    b.setPublisherId("pid-" + changePid);
-                    map.put(changePid, b);
-                    doUpdate(map);
-                    break;
-
-                default:
-                    break;
-
-            }
-        } else {
-            System.out.println("Publisher does not exist");
-        }
-    }
-
-    private static void doUpdate(Map<String, Book> map) {
+    public static void update(Map<String, Book> map) {
         try {
             FileWriter fr = new FileWriter("./resources/publisher.csv");
             BufferedWriter writer = new BufferedWriter(fr);
@@ -164,5 +111,6 @@ public class BookDao {
             exc.printStackTrace();
         }
     }
+
 }
 

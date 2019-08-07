@@ -1,7 +1,6 @@
 package com.smoothstack.lms.dao;
 
 import com.smoothstack.lms.model.Publisher;
-import com.sun.javafx.logging.PulseLogger;
 
 import java.io.*;
 import java.util.*;
@@ -36,7 +35,7 @@ public class PublisherDao {
 
     public static Map<String, Publisher> createMap() {
 
-        Map<String, Publisher> publisherBookMap = new HashMap<String, Publisher>();
+        Map<String, Publisher> publisherBookMap = new HashMap<>();
         //initiated buffer reader
         try {
             FileInputStream fin = new FileInputStream("./resources/publisher.csv");
@@ -44,7 +43,7 @@ public class PublisherDao {
             String authorLine;
             while ((authorLine = buffReader.readLine()) != null) {
                 String[] splitArray = authorLine.split(";");
-                Publisher p = new Publisher(splitArray[0],splitArray[1],splitArray[2]);
+                Publisher p = new Publisher(splitArray[0], splitArray[1], splitArray[2]);
                 publisherBookMap.put(splitArray[2], p);
             }
         } catch (IOException e) {
@@ -62,7 +61,10 @@ public class PublisherDao {
                 map.remove(key);
                 map.forEach((mapKey, value) -> {
                     try {
-                        writer.append(mapKey + ";" + value.getName()+";"+value.getAddress()+";"+value.getId()+";");
+                        writer.append(mapKey + ";");
+                        writer.append(value.getName() + ";");
+                        writer.append(value.getAddress() + ";");
+                        writer.append(value.getId() + ";");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -76,55 +78,16 @@ public class PublisherDao {
         }
     }
 
-    public static void update(String key, Map<String, Publisher> map) {
-        Scanner scan = new Scanner(System.in);
-        if (map.containsKey(key)) {
-            Publisher p = map.get(key);
-            System.out.println("What would you like to change?\n" +
-                    "(1)Publisher name\n" +
-                    "(2)Publisher address\n" +
-                    "(3)Publisher id");
-            String userChoice = scan.nextLine();
-            switch (userChoice){
-                case "1":
-                    System.out.println("What would you like to change it to?");
-                    String changeName = scan.nextLine();
-                    p.setName(changeName);
-                    map.put(key,p);
-                    doUpdate(map);
-                    break;
-                case"2":
-                    System.out.println("What would you like to change it to?");
-                    String changeAddress = scan.nextLine();
-                    p.setAddress(changeAddress);
-                    map.put(key,p);
-                    doUpdate(map);
-                case"3":
-                    System.out.println("What would you like to change it to?");
-                    String changeId = scan.nextLine();
-                    while(map.containsKey(changeId)){
-                        System.out.println("Id already exists");
-                        changeId = scan.nextLine();
-                    }
-                    p.setId("pid-"+changeId);
-                    map.remove(key);
-                    map.put(changeId,p);
-                    doUpdate(map);
-            }
-        } else {
-            System.out.println("Publisher does not exist");
-        }
-    }
-
-
-    //will write the new map to the csv
-    private static void doUpdate(Map<String,Publisher>map){
+//updates the csv by writing to it
+    public static void update(Map<String, Publisher> map) {
         try {
             FileWriter fr = new FileWriter("./resources/publisher.csv");
             BufferedWriter writer = new BufferedWriter(fr);
-            map.forEach((mapKey, value0) -> {
+            map.forEach((mapKey, value) -> {
                 try {
-                    writer.append(value0.getName() + ";" + value0.getAddress()+";"+value0.getId()+";");
+                    writer.append(value.getName() + ";");
+                    writer.append(value.getAddress() + ";");
+                    writer.append(value.getId() + ";");
                     writer.newLine();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -136,4 +99,5 @@ public class PublisherDao {
         }
     }
 }
+
 

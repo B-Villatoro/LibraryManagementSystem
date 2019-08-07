@@ -13,27 +13,14 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Menu {
-    private String name;
-    private String isbn;
-    private String title;
-    private String address;
-    private String authorId;
-    private String publisherId;
-    Scanner scan = new Scanner(System.in);
-    private Map<String, List<Book>> authorMap;
-    private Map<String, Publisher> publisherMap;
-    private Map<String, Book> bookMap;
 
     public Menu() {
-        authorMap = AuthorDao.createMap();//create my map on startup
-        publisherMap = PublisherDao.createMap();
-        bookMap = BookDao.createMap();
-
         System.out.println("Hello welcome to BookBook!\nHere you will be able to organize your books!");
         mainMenu();
     }
 
-    private void mainMenu() {
+    private static void mainMenu() {
+        Scanner scan = new Scanner(System.in);
         System.out.println("What would you like to do today?\n" +
                 "(1)View the library\n" +
                 "(2)Add to the library\n" +
@@ -59,7 +46,7 @@ public class Menu {
                 handleDelete();
                 break;
 
-            case"0":
+            case "0":
                 System.out.println("GoodBye!");
                 System.exit(0);
                 break;
@@ -70,26 +57,55 @@ public class Menu {
         }
     }
 
-    //create a book and add isbn- to number then adds to book list
-    private List<Book> createBook(List<Book> bookL,String authorId) {
-        System.out.println("Please enter the title written by said author");
-        title = scan.nextLine();
+    //method creates book and returns it to the list. Needed for adding and author with a list of books
+    private static List<Book> createBook(List<Book> bookL, String authorId) {
+        String isbn;
+        String title;
+        String publisherId;
+        String yn;
+        Scanner scan = new Scanner(System.in);
+        Map<String, Publisher> publisherMap = PublisherDao.createMap();
+        Map<String, Book> bookMap = BookDao.createMap();
+
         System.out.println("Please enter the ISBN");
         isbn = "isbn-" + scan.nextLine();
-        System.out.println("Please enter the publisher Id");
-        publisherId = "isbn-" + scan.nextLine();
-        bookL.add(new Book(title, isbn,publisherId,authorId));
-        System.out.println("Would you like to add another? y/n");
-        String yn = scan.nextLine();
-        yn = yn.toLowerCase();
-        if (yn.equals("y") || yn.equals("yes")) {
-            return createBook(bookL,authorId);
+        if (bookMap.containsKey(isbn)) {
+            System.out.println("That book already exists, would you like to try again?");
+            yn = scan.nextLine();
+            if (yn.equalsIgnoreCase("y") || yn.equalsIgnoreCase("yes")) {
+                return createBook(bookL, authorId);
+            } else mainMenu();
         }
+
+        System.out.println("Please enter the publisher Id");
+        publisherId = "pid-" + scan.nextLine();
+        if (publisherMap.containsKey(publisherId)) {
+
+            System.out.println("Please enter the title written by said author");
+            title = scan.nextLine();
+
+            bookL.add(new Book(title, isbn, authorId, publisherId));
+            BookDao.add(new Book(title, isbn, authorId, publisherId));
+
+            System.out.println("Would you like to add another? y/n");
+            yn = scan.nextLine();
+            yn = yn.toLowerCase();
+
+            if (yn.equalsIgnoreCase("y") || yn.equalsIgnoreCase("yes")) {
+                return createBook(bookL, authorId);
+            }
+        } else {
+            System.out.println("Publisher does not exist, please add");
+            handleAddPublisher();
+
+        }
+
         return bookL;
     }
 
     //prompts back to main menu
-    private void backToMenu() {
+    private static void backToMenu() {
+        Scanner scan = new Scanner(System.in);
         System.out.println("Would you like to go back to main menu? y/n");
         String yn = scan.nextLine();
         yn = yn.toLowerCase();
@@ -98,7 +114,8 @@ public class Menu {
         } else System.exit(0);
     }
 
-    private void handleAdd() {
+    private static void handleAdd() {
+        Scanner scan = new Scanner(System.in);
         System.out.println("What item would you like to add?\n" +
                 "(1)Author\n" +
                 "(2)Book\n" +
@@ -108,61 +125,19 @@ public class Menu {
         switch (opt) {
             case "1":
             case "author":
-                System.out.println("Please enter the author name you would like to add");
-                name = scan.nextLine();
-                System.out.println("Please enter author Id");
-                authorId = scan.nextLine();
-                authorId = "aid-"+authorId;
-                if (authorMap.containsKey(authorId)) {
-                    System.out.println("Author id already exists");
-                    backToMenu();
-                } else {
-                    List<Book> bookList = new ArrayList<>();
-                    bookList = createBook(bookList,authorId);
-                    AuthorDao.add(new Author(name, bookList,authorId));
-                    authorMap = AuthorDao.createMap();
-                    backToMenu();
-                }
+                handleAddAuthor();
+                backToMenu();
                 break;
             case "2":
             case "book":
-                System.out.println("Please enter the title name you would like to add");
-                name = scan.nextLine();
-                System.out.println("Please enter Isbn ");
-                isbn = scan.nextLine();
-                isbn ="isbn-"+isbn;
-                if (bookMap.containsKey(isbn)) {
-                    System.out.println("ISBN already exists");
-                    backToMenu();
-                } else {
-                    System.out.println("Please enter the author id");
-                    authorId = scan.nextLine();
-                    System.out.println("Please enter the publisher id");
-                    publisherId = scan.nextLine();
-                    BookDao.add(new Book(name,(isbn),authorId,publisherId));
-                    bookMap = BookDao.createMap();
-                    backToMenu();
-                }
+                handleAddBook();
+                backToMenu();
                 break;
 
             case "3":
             case "publisher":
-                System.out.println("Please enter the publisher name you would like to add");
-                name = scan.nextLine();
-                System.out.println("Please enter the publisher Id");
-                publisherId = scan.nextLine();
-                publisherId = "pid-"+publisherId;
-                if (publisherMap.containsKey(publisherId)) {
-                    System.out.println("Publisher id already exists");
-                    backToMenu();
-                } else {
-                    System.out.println("Please enter Publisher address");
-                    address = scan.nextLine();
-                    PublisherDao.add(new Publisher(name,address,publisherId));
-                    publisherMap = PublisherDao.createMap();
-                    backToMenu();
-                }
-
+                handleAddPublisher();
+                backToMenu();
                 break;
 
             default:
@@ -173,7 +148,8 @@ public class Menu {
 
     }
 
-    private void handleShow() {
+    private static void handleShow() {
+        Scanner scan = new Scanner(System.in);
         System.out.println("What item would you like to see?\n" +
                 "(1)Author\n" +
                 "(2)Book\n" +
@@ -206,7 +182,9 @@ public class Menu {
         }
 
     }
-    private void handleUpdate(){
+
+    private static void handleUpdate() {
+        Scanner scan = new Scanner(System.in);
         System.out.println("What item would you like to update?\n" +
                 "(1)Author\n" +
                 "(2)Book\n" +
@@ -216,39 +194,32 @@ public class Menu {
         switch (opt) {
             case "1":
             case "author":
-                System.out.println("Enter the author id that you would like to update");
-                String updateKey = scan.nextLine();
-                AuthorDao.update(updateKey, authorMap);
-                authorMap = AuthorDao.createMap();
+                handleUpdateAuthor();
                 backToMenu();
                 break;
+
             case "2":
             case "book":
-                System.out.println("Enter the book isbn that you would like to update");
-                String updateKey0 = scan.nextLine();
-                BookDao.update(updateKey0, bookMap);
-                bookMap = BookDao.createMap();
+                handleUpdateBook();
                 backToMenu();
                 break;
 
             case "3":
             case "publisher":
-                System.out.println("Enter the publisher id thay you would like to update");
-                String updateKey1 = scan.nextLine();
-                PublisherDao.update(updateKey1, publisherMap);
-                publisherMap = PublisherDao.createMap();
+                handleUpdatePublisher();
                 backToMenu();
                 break;
 
             default:
                 System.out.println("Wrong Input");
-                handleShow();
+                handleUpdate();
                 break;
 
         }
     }
 
-    private void handleDelete(){
+    private static void handleDelete() {
+        Scanner scan = new Scanner(System.in);
         System.out.println("What item would you like to delete?\n" +
                 "(1)Author\n" +
                 "(2)Book\n" +
@@ -258,6 +229,7 @@ public class Menu {
         switch (opt) {
             case "1":
             case "author":
+                Map<String, Author> authorMap = AuthorDao.createMap();
                 System.out.println("Write the author you would like to delete?");
                 String deleteKey = scan.nextLine();
                 AuthorDao.delete(deleteKey, authorMap);
@@ -265,6 +237,7 @@ public class Menu {
                 break;
             case "2":
             case "book":
+                Map<String, Book> bookMap = BookDao.createMap();
                 System.out.println("Write the publisher you would like to delete?");
                 String deleteKey0 = scan.nextLine();
                 BookDao.delete(deleteKey0, bookMap);
@@ -273,6 +246,7 @@ public class Menu {
 
             case "3":
             case "publisher":
+                Map<String, Publisher> publisherMap = PublisherDao.createMap();
                 System.out.println("Write the publisher you would like to update?");
                 String deleteKey1 = scan.nextLine();
                 PublisherDao.delete(deleteKey1, publisherMap);
@@ -286,4 +260,228 @@ public class Menu {
         }
     }
 
+    private static void handleAddAuthor() {
+        Map<String, Author> authorMap = AuthorDao.createMap();
+        Scanner scan = new Scanner(System.in);
+        String name;
+        String authorId;
+
+        System.out.println("Please enter author Id");
+        authorId = scan.nextLine();
+        authorId = "aid-" + authorId;
+
+        if (authorMap.containsKey(authorId)) {
+            System.out.println("Author id already exists");
+            backToMenu();
+        } else {
+            System.out.println("Please enter the author name you would like to add");
+            name = scan.nextLine();
+
+            List<Book> bookList = new ArrayList<>();
+            bookList = createBook(bookList, authorId);
+
+            AuthorDao.add(new Author(name, bookList, authorId));
+        }
+    }
+
+    private static void handleAddBook() {
+        Map<String, Book> bookMap = BookDao.createMap();
+        Scanner scan = new Scanner(System.in);
+        String title;
+        String isbn;
+        String authorId;
+        String publisherId;
+
+        System.out.println("Please enter Isbn ");
+        isbn = scan.nextLine();
+        isbn = "isbn-" + isbn;
+
+        //if isbn already exists, book exists
+        if (bookMap.containsKey(isbn)) {
+            System.out.println("ISBN already exists, returning to main menu");
+            mainMenu();
+        } else {
+            //prompt for pid and check if exists
+            Map<String, Publisher> publisherMap = PublisherDao.createMap();
+
+            System.out.println("Please enter the title name you would like to add");
+            title = scan.nextLine();
+
+            System.out.println("Please enter the publisher id");
+            publisherId = scan.nextLine();
+            publisherId = "pid" + publisherId;
+
+            if (publisherMap.containsKey(publisherId)) {
+                //prompt for aid and check if exists
+                Map<String, Author> authorMap = AuthorDao.createMap();
+                System.out.println("Please enter the author id");
+                authorId = scan.nextLine();
+                authorId = "aid-" + authorId;
+                if (authorMap.containsKey(publisherId)) {
+                    //all passes create book
+                    BookDao.add(new Book(title, (isbn), authorId, publisherId));
+                    authorMap.get(authorId).getBooks().add(new Book(title, (isbn), authorId, publisherId));
+                    backToMenu();
+                } else {
+                    //if author does not exist add the book through author handler
+                    System.out.println("Author does not exist, creating author");
+                    handleAddAuthor();
+                }
+
+            } else {
+                //if pid doesn't exist make it exist
+                System.out.println("publisher does not exist...\n" +
+                        "Creating publisher");
+                handleAddPublisher();
+                handleAddBook();
+            }
+        }//end big else
+    }
+
+    private static void handleAddPublisher() {
+        Map<String, Publisher> publisherMap = PublisherDao.createMap();
+        Scanner scan = new Scanner(System.in);
+        String address;
+        String publisherName;
+        String publisherId;
+
+        System.out.println("Please create the publisher Id");
+        publisherId = scan.nextLine();
+        publisherId = "pid-" + publisherId;
+        if (publisherMap.containsKey(publisherId)) {
+            System.out.println("Publisher id already exists");
+            backToMenu();
+        } else {
+            System.out.println("Please enter the publisher name you would like to add");
+            publisherName = scan.nextLine();
+
+            System.out.println("Please enter the publisher address");
+            address = scan.nextLine();
+
+            PublisherDao.add(new Publisher(publisherName, address, publisherId));
+        }
+    }
+
+    private static void handleUpdateAuthor() {
+        Map<String, Author> authorMap = AuthorDao.createMap();
+        Scanner scan = new Scanner(System.in);
+
+        System.out.println("Enter the Author Id you would like to update");
+        String authorKey = scan.nextLine();
+
+        if(authorMap.containsKey(authorKey)){
+
+        }else{
+            System.out.println("Author Id does not exist");
+        }
+
+    }
+
+    private static void handleUpdateBook() {
+        Scanner scan = new Scanner(System.in);
+        Map<String, Book> bookMap = BookDao.createMap();
+        String bookKey;
+        String userChoice;
+
+        System.out.println("Enter the ISBN that you would like to update");
+        bookKey = scan.nextLine();
+
+        if (bookMap.containsKey(bookKey)) {
+            Book b = bookMap.get(bookKey);
+            System.out.println("What would you like to change?\n" +
+                    "(1)Book title\n" +
+                    "(2)Book ISBN\n" +
+                    "(3)Author id\n" +
+                    "(4)Publisher id");
+            userChoice = scan.nextLine();
+
+            switch (userChoice) {
+                case "1":
+                    System.out.println("What would you like to change it to?");
+                    String changeTitle = scan.nextLine();
+                    b.setTitle(changeTitle);
+                    bookMap.put(bookKey, b);
+                    BookDao.update(bookMap);
+                    break;
+
+                case "2":
+                    System.out.println("What would you like to change it to?");
+                    String changeIsbn = scan.nextLine();
+                    while (bookMap.containsKey(changeIsbn)) {
+                        System.out.println("ISBN already exists, please try again");
+                        changeIsbn = scan.nextLine();
+                    }
+                    b.setIsbn("pid-" + changeIsbn);
+                    bookMap.remove(bookKey);
+                    bookMap.put(changeIsbn, b);
+                    BookDao.update(bookMap);
+                    break;
+
+                case "3":
+                    System.out.println("What would you like to change it to?");
+                    String changeAid = scan.nextLine();
+                    b.setAuthorId(changeAid);
+                    bookMap.put(bookKey, b);
+                    BookDao.update(bookMap);
+                    break;
+
+            }
+        } else {
+            System.out.println("ISBN does not exist");
+        }
+
+    }
+
+
+    private static void handleUpdatePublisher() {
+        Scanner scan = new Scanner(System.in);
+        Map<String, Publisher> publisherMap = PublisherDao.createMap();
+        String publisherKey;
+        String userChoice;
+
+        System.out.println("Enter the publisher id that you would like to update");
+        publisherKey = scan.nextLine();
+
+        if (publisherMap.containsKey(publisherKey)) {
+            Publisher p = publisherMap.get(publisherKey);
+            System.out.println("What would you like to change?\n" +
+                    "(1)Publisher name\n" +
+                    "(2)Publisher address\n" +
+                    "(3)Publisher id");
+            userChoice = scan.nextLine();
+
+            switch (userChoice) {
+                case "1":
+                    System.out.println("What would you like to change it to?");
+                    String changeName = scan.nextLine();
+                    p.setName(changeName);
+                    publisherMap.put(publisherKey, p);
+                    PublisherDao.update(publisherMap);
+                    break;
+
+                case "2":
+                    System.out.println("What would you like to change it to?");
+                    String changeAddress = scan.nextLine();
+                    p.setAddress(changeAddress);
+                    publisherMap.put(publisherKey, p);
+                    PublisherDao.update(publisherMap);
+                    break;
+
+                case "3":
+                    System.out.println("What would you like to change it to?");
+                    String changeId = scan.nextLine();
+                    while (publisherMap.containsKey(changeId)) {
+                        System.out.println("Id already exists, please try again.");
+                        changeId = scan.nextLine();
+                    }
+                    p.setId("pid-" + changeId);
+                    publisherMap.remove(publisherKey);
+                    publisherMap.put(changeId, p);
+                    PublisherDao.update(publisherMap);
+            }
+        } else {
+            System.out.println("Publisher does not exist");
+        }
+
+    }
 }
