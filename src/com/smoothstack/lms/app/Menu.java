@@ -369,12 +369,48 @@ public class Menu {
         System.out.println("Enter the Author Id you would like to update");
         String authorKey = scan.nextLine();
 
-        if(authorMap.containsKey(authorKey)){
+        if (authorMap.containsKey(authorKey)) {
+            Author a = authorMap.get(authorKey);
+            System.out.println("What would you like to change?\n" +
+                    "(1)Author name\n" +
+                    "(2)Author Id\n");
+            String userChoice = scan.nextLine();
+            switch (userChoice) {
+                case "1":
+                    System.out.println("What would you like to change it to?");
+                    String changeName = scan.nextLine();
+                    a.setName(changeName);
+                    authorMap.put(authorKey, a);
+                    AuthorDao.update(authorMap);
+                    break;
 
-        }else{
+                case "2":
+                    System.out.println("What would you like to change it to?");
+                    String changeAid = scan.nextLine();
+                    while (authorMap.containsKey(changeAid)) {
+                        System.out.println("ISBN already exists, please try again");
+                        changeAid = scan.nextLine();
+                    }
+
+                    Map<String,Book> bookMap = BookDao.createMap();
+
+                    String finalChangeAid = changeAid;
+                    bookMap.entrySet().forEach(e-> {
+                        if(e.getValue().getAuthorId().equalsIgnoreCase(authorMap.get(authorKey).getId())){
+                            e.getValue().setAuthorId("aid-"+finalChangeAid);
+                        }
+                    });
+                    a.setId("aid-" + changeAid);
+                    authorMap.remove(authorKey);
+                    authorMap.put(changeAid, a);
+                    AuthorDao.update(authorMap);
+                    BookDao.update(bookMap);
+                    break;
+            }
+
+        } else {
             System.out.println("Author Id does not exist");
         }
-
     }
 
     private static void handleUpdateBook() {
@@ -478,6 +514,7 @@ public class Menu {
                     publisherMap.remove(publisherKey);
                     publisherMap.put(changeId, p);
                     PublisherDao.update(publisherMap);
+                    break;
             }
         } else {
             System.out.println("Publisher does not exist");

@@ -3,6 +3,7 @@ package com.smoothstack.lms.dao;
 
 import java.io.*;
 import java.util.*;
+
 import com.smoothstack.lms.model.Author;
 import com.smoothstack.lms.model.Book;
 
@@ -13,7 +14,7 @@ public class AuthorDao {
             FileWriter fr = new FileWriter("./resources/authors.csv", true);
             BufferedWriter writer = new BufferedWriter(fr);
             writer.newLine();
-            writer.append(authorO.getName() + ";"+authorO.getId());
+            writer.append(authorO.getName() + ";" + authorO.getId());
             authorO.getBooks().forEach(e -> {
                 try {
                     writer.append(e.getTitle() + ";");
@@ -43,7 +44,7 @@ public class AuthorDao {
 
     public static Map<String, Author> createMap() {
 
-        Map<String,Author> authorBookMap = new HashMap<String, Author>();
+        Map<String, Author> authorBookMap = new HashMap<String, Author>();
         //initiated buffer reader
         try {
             FileInputStream fin = new FileInputStream("./resources/authors.csv");
@@ -89,7 +90,7 @@ public class AuthorDao {
                 map.forEach((mapKey, bookList) -> {
                     map.get(mapKey).getBooks().forEach(e -> {
                         try {
-                            String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";"+e.getAuthorId()+";";
+                            String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";" + e.getAuthorId() + ";";
                             writer.append(stringBuild);
                             writer.newLine();
                         } catch (IOException exc0) {
@@ -106,49 +107,14 @@ public class AuthorDao {
         }
     }
 
-    public static void update(String key, Map<String,Author> map) {
-        if (map.containsKey(key)) {
-
-            List<Book> newBooks = map.get(key).getBooks();
-
-            System.out.println("What would you like to change?");
-            map.get(key).getBooks().forEach(e -> {
-                System.out.println(e.getTitle() + " " + e.getIsbn());
-            });
-            Scanner scan = new Scanner(System.in);
-            String userChoice = scan.nextLine();
-            int listIndex = 99999;
-            for (int i = 0; i < newBooks.size(); i++) {
-                System.out.println(newBooks.get(i).getTitle());
-                if (newBooks.get(i).getTitle().equals(userChoice)) {
-                    listIndex = i;
-                    System.out.println("What Would you like to change it to?");
-                    String changeTo = scan.nextLine();
-                    newBooks.get(listIndex).setTitle(changeTo);
-                    map.get(key).getBooks().set(listIndex, newBooks.get(listIndex));
-                    break;
-                }
-            }
-            if (listIndex == 99999){
-                System.out.println("\nNo match try again\n");
-                update(key,map);
-            }
-            else{
-                doUpdate(map);
-            }
-        } else {
-            System.out.println("Author does not exist");
-        }
-    }
-
-    private static void doUpdate(Map<String,Author>map){
+    public static void update(Map<String, Author> map) {
         try {
             FileWriter fr = new FileWriter("./resources/authors.csv");
             BufferedWriter writer = new BufferedWriter(fr);
             map.forEach((mapKey, bookList) -> {
                 map.get(mapKey).getBooks().forEach(e -> {
                     try {
-                        String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";"+e.getAuthorId()+";";
+                        String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";" + e.getAuthorId() + ";";
                         writer.append(stringBuild);
                         writer.newLine();
                     } catch (IOException exc0) {
