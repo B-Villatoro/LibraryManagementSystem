@@ -1,6 +1,5 @@
 package com.smoothstack.lms.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Author {

@@ -12,8 +12,8 @@ public class PublisherDao {
             FileWriter fr = new FileWriter("./resources/publisher.csv", true);
             BufferedWriter writer = new BufferedWriter(fr);
             writer.newLine();
-            writer.append(publisher.getAddress() + ";");
             writer.append(publisher.getName() + ";");
+            writer.append(publisher.getAddress() + ";");
             writer.append(publisher.getId() + ";");
             writer.close();
             System.out.println(publisher.getName() + " has been added!");

@@ -17,8 +17,8 @@ public class BookDao {
             try {
                 writer.append(book.getTitle() + ";");
                 writer.append(book.getIsbn() + ";");
-                writer.append(book.getPublisherId() + ";");
                 writer.append(book.getAuthorId() + ";");
+                writer.append(book.getPublisherId() + ";");
             } catch (IOException a) {
                 a.printStackTrace();
             }
@@ -43,21 +43,23 @@ public class BookDao {
 
     public static Map<String, Book> createMap() {
 
-        Map<String, Book> bookMap = new HashMap<String, Book>();
+        Map<String, Book> bookMap = new HashMap<>();
         //initiated buffer reader
         try {
-            Book b = new Book();
             FileInputStream fin = new FileInputStream("./resources/book.csv");
             BufferedReader buffReader = new BufferedReader(new InputStreamReader(fin));
             String authorLine;
             while ((authorLine = buffReader.readLine()) != null) {
                 String[] splitArray = authorLine.split(";");
+                Book b = new Book();
+
                 b.setTitle(splitArray[0]);
                 b.setIsbn(splitArray[1]);
                 b.setAuthorId(splitArray[2]);
                 b.setPublisherId(splitArray[3]);
                 bookMap.put(b.getIsbn(), b);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -73,7 +75,6 @@ public class BookDao {
                 map.remove(key);
                 map.forEach((mapKey, value) -> {
                     try {
-                        writer.append(mapKey + ";");
                         writer.append(value.getTitle() + ";");
                         writer.append(value.getIsbn() + ";");
                         writer.append(value.getAuthorId() + ";");
@@ -94,13 +95,15 @@ public class BookDao {
 
     public static void update(Map<String, Book> map) {
         try {
-            FileWriter fr = new FileWriter("./resources/publisher.csv");
+            FileWriter fr = new FileWriter("./resources/book.csv");
             BufferedWriter writer = new BufferedWriter(fr);
-            map.forEach((mapKey, value0) -> {
+            map.forEach((mapKey, value) -> {
+
                 try {
-                    writer.append(value0.getTitle() + ";" + value0.getIsbn() + ";" +
-                            value0.getAuthorId() + ";" +
-                            value0.getPublisherId() + ";");
+                    writer.append(map.get(mapKey).getTitle() + ";");
+                    writer.append(map.get(mapKey).getIsbn() + ";");
+                    writer.append(map.get(mapKey).getAuthorId() + ";");
+                    writer.append(map.get(mapKey).getPublisherId() + ";");
                     writer.newLine();
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -14,17 +14,18 @@ public class AuthorDao {
             FileWriter fr = new FileWriter("./resources/authors.csv", true);
             BufferedWriter writer = new BufferedWriter(fr);
             writer.newLine();
-            writer.append(authorO.getName() + ";" + authorO.getId());
+            writer.append(authorO.getName() + ";" + authorO.getId() + ";");
             authorO.getBooks().forEach(e -> {
                 try {
                     writer.append(e.getTitle() + ";");
                     writer.append(e.getIsbn() + ";");
+                    writer.append(e.getPublisherId() + ";");
+                    writer.append(e.getAuthorId() + ";");
                 } catch (IOException a) {
                     a.printStackTrace();
                 }
             });
             writer.close();
-            System.out.println(authorO.getName() + " has been added!");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,21 +57,18 @@ public class AuthorDao {
                 //creating the author object to pass into the map
                 Author author = new Author();
                 author.setName(splitArray[0]);
-                author.setId(splitArray[3]);
+                author.setId(splitArray[1]);
 
-                Book b = new Book();
-                b.setTitle(splitArray[1]);
-                b.setIsbn(splitArray[2]);
-
-                if (authorBookMap.containsKey(splitArray[3])) {
-                    //if the author id is already made just add the book to the book list
-                    authorBookMap.get(splitArray[0]).getBooks().add(b);
-                } else {
-                    //else make a new value with a new key
+                for (int i = 2; i < splitArray.length; i += 4) {
+                    Book b = new Book();
                     List<Book> books = new ArrayList<>();
+                    b.setTitle(splitArray[i]);
+                    b.setIsbn(splitArray[i + 1]);
+                    b.setAuthorId(splitArray[i + 2]);
+                    b.setPublisherId(splitArray[i + 3]);
                     books.add(b);
                     author.setBooks(books);
-                    authorBookMap.put(splitArray[0], author);
+                    authorBookMap.put(splitArray[1], author);
                 }
             }
         } catch (IOException e) {
@@ -108,22 +106,30 @@ public class AuthorDao {
 
     public static void update(Map<String, Author> map) {
         try {
-            FileWriter fr = new FileWriter("./resources/authors.csv");
+            FileWriter fr = new FileWriter("./resources/authors.csv", true);
             BufferedWriter writer = new BufferedWriter(fr);
-            map.forEach((mapKey, bookList) -> {
-                map.get(mapKey).getBooks().forEach(e -> {
-                    try {
-                        String stringBuild = mapKey + ";" + e.getTitle() + ";" + e.getIsbn() + ";" + e.getAuthorId() + ";";
-                        writer.append(stringBuild);
-                        writer.newLine();
-                    } catch (IOException exc0) {
-                        exc0.printStackTrace();
-                    }
-                });
+            writer.newLine();
+            map.forEach((key,author)->{
+                try {
+                    writer.append(author.getName() + ";");
+                    writer.append(author.getId() + ";");
+                    author.getBooks().forEach((book)->{
+                        try{
+                            writer.append(book.getTitle() + ";");
+                            writer.append(book.getIsbn() + ";");
+                            writer.append(book.getPublisherId() + ";");
+                            writer.append(book.getAuthorId() + ";");
+                        }catch (IOException ex2){
+                            ex2.printStackTrace();
+                        }
+                    });
+                } catch (IOException exc) {
+                    exc.printStackTrace();
+                }
             });
-            writer.close();
-        } catch (IOException exc) {
-            exc.printStackTrace();
+            writer.newLine();
+        } catch (IOException exc1) {
+            exc1.printStackTrace();
         }
     }
 }
